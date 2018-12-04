@@ -6,14 +6,6 @@ Vagrant.configure(2) do |config|
   config.vm.box_check_update = false
   config.vm.network :public_network, bridge: 'en1: Wi-Fi (AirPort)'
   config.vm.synced_folder '.', '/vagrant', disabled: true
-  config.vm.synced_folder 'var/www/', '/var/www',
-                          type: 'rsync',
-                          rsync__exclude: [
-                            '/var/www/default/node_modules',
-                            '/var/www/default/public'
-                          ],
-                          rsync__args: ['--verbose', '--archive', '--compress'],
-                          create: true
 
   config.vm.provider 'virtualbox' do |vb|
     vb.memory = 2048
