@@ -20,15 +20,15 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.provision 'shell', inline: <<-UPDATE_APTGET
-    apt-get update
+    apt-get update --yes
   UPDATE_APTGET
 
   config.vm.provision 'shell', inline: <<-INSTALL_UTILS
-    apt-get install -y git unzip
+    apt-get install --yes git unzip
   INSTALL_UTILS
 
   config.vm.provision 'shell', inline: <<-INSTALL_APACHE2
-    apt-get install -y apache2 apache2-dev
+    apt-get install --yes apache2 apache2-dev
     echo 'ServerName 127.0.0.1' > /etc/apache2/conf-available/local-servername.conf
     a2enconf local-servername
   INSTALL_APACHE2
@@ -36,13 +36,13 @@ Vagrant.configure(2) do |config|
   config.vm.provision 'shell', inline: <<-INSTALL_MYSQL
     echo 'mysql-server mysql-server/root_password password vagrant' | debconf-set-selections
     echo 'mysql-server mysql-server/root_password_again password vagrant' | debconf-set-selections
-    apt-get install -y mysql-server
+    apt-get install --yes mysql-server
     mkdir -p /var/log
     touch /var/log/slow.log
   INSTALL_MYSQL
 
   config.vm.provision 'shell', privileged: false, inline: <<-INITIALIZE_MYSQL
-    echo "[mysqld]" >> "/home/vagrant/.my.cnf"
+    echo "[mysqld]" > "/home/vagrant/.my.cnf"
     echo "innodb_buffer_pool_size=512M" >> "/home/vagrant/.my.cnf"
     echo "innodb_additional_mem_pool_size=20M" >> "/home/vagrant/.my.cnf"
     echo "innodb_log_buffer_size=64M" >> "/home/vagrant/.my.cnf"
@@ -96,7 +96,7 @@ Vagrant.configure(2) do |config|
   INSTALL_PHPENV
 
   config.vm.provision 'shell', inline: <<-INSTALL_PHP7_0_10LIB
-    apt-get install -y sqlite libxml2-dev libcurl4-openssl-dev libbz2-dev re2c libgd-dev libicu-dev libtidy-dev libreadline-dev pkg-config make libtool autoconf automake bison nasm
+    apt-get install --yes sqlite libxml2-dev libcurl4-openssl-dev libbz2-dev re2c libgd-dev libicu-dev libtidy-dev libreadline-dev pkg-config make libtool autoconf automake bison nasm
   INSTALL_PHP7_0_10LIB
 
   config.vm.provision 'shell', inline: <<-PRE_INSTALL_PHP
@@ -125,28 +125,15 @@ Vagrant.configure(2) do |config|
   POST_INSTALL_PHP
 
   config.vm.provision 'shell', privileged: false, inline: <<-INITIALIZE_PHP
-    if ! grep -q extension=apcu.so /home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini; then
-      perl -pe 's%^;?(default_charset)\s?=\s?.?$%$1 = "UTF-8"%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      perl -pe 's%^;?(mbstring\.language)\s?=\s?.?$%$1 = Japanese%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      perl -pe 's%^;?(mbstring\.encoding_translation)\s?=\s?.?$%$1 = Off%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      perl -pe 's%^;?(mbstring\.detect_order)\s?=\s?.?$%$1 = UTF-8,SJIS,EUC-JP,JIS,ASCII%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      perl -pe 's%^;?(date\.timezone)\s?=\s?.?$%$1 = Asia/Tokyo%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      perl -pe 's%^;?(expose_php)\s?=\s?.?$%$1 = Off%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      perl -pe 's%^;?(memory_limit)\s?=\s?.?$%$1 = 512M%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      perl -pe 's%^;?(post_max_size)\s?=\s?.?$%$1 = 128M%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      perl -pe 's%^;?(upload_max_filesize)\s?=\s?.?$%$1 = 128M%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      echo "opcache.enable=1" >> "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      echo "opcache.memory_consumption=128" >> "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      echo "opcache.interned_strings_buffer=8" >> "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      echo "opcache.max_accelerated_files=4000" >> "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      echo "opcache.revalidate_freq=60" >> "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      echo "opcache.fast_shutdown=1" >> "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      echo "opcache.enable_cli=1" >> "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      echo "extension=apcu.so" >> "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      echo "apc.shm_size=128M" >> "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      echo "apc.ttl=86400" >> "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-      echo "apc.gc_ttl=86400" >> "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
-    fi
+    perl -pe 's%^;?(default_charset)\s?=\s?.?$%$1 = "UTF-8"%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
+    perl -pe 's%^;?(mbstring\.language)\s?=\s?.?$%$1 = Japanese%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
+    perl -pe 's%^;?(mbstring\.encoding_translation)\s?=\s?.?$%$1 = Off%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
+    perl -pe 's%^;?(mbstring\.detect_order)\s?=\s?.?$%$1 = UTF-8,SJIS,EUC-JP,JIS,ASCII%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
+    perl -pe 's%^;?(date\.timezone)\s?=\s?.?$%$1 = Asia/Tokyo%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
+    perl -pe 's%^;?(expose_php)\s?=\s?.?$%$1 = Off%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
+    perl -pe 's%^;?(memory_limit)\s?=\s?.?$%$1 = 512M%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
+    perl -pe 's%^;?(post_max_size)\s?=\s?.?$%$1 = 128M%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
+    perl -pe 's%^;?(upload_max_filesize)\s?=\s?.?$%$1 = 128M%' -i.bak "/home/vagrant/.anyenv/envs/phpenv/versions/7.0.10/etc/php.ini"
   INITIALIZE_PHP
 
   config.vm.provision 'shell', privileged: false, inline: <<-INITIALIZE_COMPOSER
@@ -184,11 +171,11 @@ Vagrant.configure(2) do |config|
   INITIALIZE_APACHE2
 
   config.vm.provision 'shell', inline: <<-INSTALL_NPMLIB
-    apt-get install -y graphicsmagick imagemagick libjpeg-progs gifsicle optipng
+    apt-get install --yes graphicsmagick imagemagick libjpeg-progs gifsicle optipng
   INSTALL_NPMLIB
 
   config.vm.provision 'shell', inline: <<-INSTALL_ZSH
-    apt-get install -y zsh
+    apt-get install --yes zsh
     if [ ! -d /usr/local/share/zsh-completions ]; then
       git clone git://github.com/zsh-users/zsh-completions.git /usr/local/share/zsh-completions
     fi
@@ -219,7 +206,7 @@ Vagrant.configure(2) do |config|
   CHSH_ZSH
 
   config.vm.provision 'shell', run: 'always', inline: <<-TEARDOWN
-    apt-get autoremove -y
+    apt-get autoremove --yes
     if [ -x "$(command -v mysql)" ]; then
       service mysql restart
     fi
